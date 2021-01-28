@@ -1,0 +1,14 @@
+{
+  "name": "@tybys/wasm-iconv",
+  "main": "index.js",
+  "typings": "index.d.ts",
+  "scripts": {
+    "configure": "cgen configure -e",
+    "configure:debug": "cgen configure -e --debug",
+    "build": "cgen build",
+    "build:debug": "cgen build --debug",
+    "clean": "cgen clean",
+    "rebuild": "cgen rebuild -e",
+    "rebuild:debug": "cgen rebuild -e --debug"
+  }
+}
