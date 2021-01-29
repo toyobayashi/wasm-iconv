@@ -51,8 +51,9 @@ static emscripten::val js_iconv(int cd, const emscripten::val& inbuf, size_t inb
     p_inbuf = nullptr;
   } else if (inbuf.isString()) {
     s = inbuf.as<std::string>();
-    const char* str = s.c_str();
-    p_inbuf = const_cast<char**>(&str);
+    buf = std::vector<char>(s.c_str(), s.c_str() + s.length());
+    str = buf.data();
+    p_inbuf = &str;
   } else if (inbuf.instanceof(ArrayBuffer) || ArrayBuffer["isView"](inbuf).as<bool>()) {
     buf = emscripten::convertJSArrayToNumberVector<char>(emscripten::val::global("Uint8Array").new_(inbuf["buffer"]));
     str = buf.data();
