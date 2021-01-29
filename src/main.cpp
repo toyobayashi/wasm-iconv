@@ -54,15 +54,9 @@ static emscripten::val js_iconv(int cd, const emscripten::val& inbuf, size_t inb
     const char* str = s.c_str();
     p_inbuf = const_cast<char**>(&str);
   } else if (inbuf.instanceof(ArrayBuffer) || ArrayBuffer["isView"](inbuf).as<bool>()) {
-    emscripten::val u8arr = Uint8Array.new_(inbuf["buffer"]);
-    unsigned int byteLength = u8arr["length"].as<unsigned int>();
-    std::cout << "length: " << byteLength << "\n";
-    buf = std::vector<char>(byteLength, 0);
-    for (unsigned int i = 0; i < byteLength; i++) {
-      buf[i] = u8arr[i].as<char>();
-    }
+    buf = emscripten::convertJSArrayToNumberVector<char>(emscripten::val::global("Uint8Array").new_(inbuf["buffer"]));
     str = buf.data();
-    p_inbuf = const_cast<char**>(&str);
+    p_inbuf = &str;
   } else {
     emscripten::val::global("TypeError").new_(std::string("Invalid inbuf")).throw_();
     return emscripten::val((size_t)-1);
@@ -104,11 +98,9 @@ static emscripten::val js_iconv(int cd, const emscripten::val& inbuf, size_t inb
     obj.set("outbuf", emscripten::val::null());
     // obj.set("outString", std::string(""));
   } else {
-    size_t len = total - outbytesleft;
-    emscripten::val outbufarr = Uint8Array.new_(total - outbytesleft);
-    for (size_t i = 0; i < len; i++) {
-      outbufarr.set(i, outbuforigin[i]);
-    }
+    const size_t len = total - outbytesleft;
+    emscripten::val outbufarr = Uint8Array.new_(len);
+    outbufarr.call<void>("set", emscripten::val(emscripten::typed_memory_view(len, outbuforigin)));
 
     obj.set("outbuf", outbufarr);
     // obj.set("outString", std::string(outbuforigin));
